@@ -50,7 +50,7 @@ int main() {
                 col += color(r, world);
             }
             col /= float(ns);
-            
+            col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); // simple gamma fix
             int ir = int(255 * col.r());
             int ig = int(255 * col.g());
             int ib = int(255 * col.b());
