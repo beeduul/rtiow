@@ -1,5 +1,5 @@
 #include <iostream>
-#include "float.h"
+#include <float.h>
 
 #include "hitable_list.hpp"
 #include "sphere.hpp"
