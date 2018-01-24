@@ -27,6 +27,35 @@ vec3 color(const ray& r, hitable *world, int depth) {
     }
 }
 
+const int num_pixel_bytes = 3;
+
+void trace_line(int j, int nx, int ny, int ns, const camera& cam, hitable *world, unsigned char *data) {
+    std::cout << "tracing line " << (j+1) << "/" << ny << std::endl;
+    for (int i = 0; i < nx; i++) {
+
+        vec3 col(0, 0, 0);
+        for (int s = 0; s < ns; s++) {
+            float u = float(i + drand48()) / float(nx);
+            float v = float(j + drand48()) / float(ny);
+            ray r = cam.get_ray(u, v);
+            vec3 p = r.point_at_parameter(2.0);
+            col += color(r, world, 0);
+        }
+        col /= float(ns);
+        col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); // simple gamma fix
+        int ir = int(255 * col.r());
+        int ig = int(255 * col.g());
+        int ib = int(255 * col.b());
+        
+        const int pixel_idx = (i + (ny - 1 - j) * nx) * num_pixel_bytes;
+
+        data[pixel_idx + 0] = (unsigned char) ir;
+        data[pixel_idx + 1] = (unsigned char) ig;
+        data[pixel_idx + 2] = (unsigned char) ib;
+    }
+
+}
+
 int main() {
     const int nx = 200;
     const int ny = 100;
@@ -40,38 +69,17 @@ int main() {
     
     hitable *world = new hitable_list(list, 4);
 
-    std::cout << "Begin Tracing " << nx << " " << ny << std::endl;
-    
-
     camera cam;
 
-    const int num_pixel_bytes = 3;
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
 
+    unsigned int hardware_concurrency = std::thread::hardware_concurrency();
+    std::cout << hardware_concurrency << " concurrent threads are supported.\n";
+
+    std::cout << "Begin Tracing " << nx << " " << ny << std::endl;
+
     for (int j = ny-1; j >= 0; j--) {
-        std::cout << "tracing line " << (j+1) << "/" << ny << std::endl;
-        for (int i = 0; i < nx; i++) {
-
-            vec3 col(0, 0, 0);
-            for (int s = 0; s < ns; s++) {
-                float u = float(i + drand48()) / float(nx);
-                float v = float(j + drand48()) / float(ny);
-                ray r = cam.get_ray(u, v);
-                vec3 p = r.point_at_parameter(2.0);
-                col += color(r, world, 0);
-            }
-            col /= float(ns);
-            col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); // simple gamma fix
-            int ir = int(255 * col.r());
-            int ig = int(255 * col.g());
-            int ib = int(255 * col.b());
-            
-            const int pixel_idx = (i + (ny - 1 - j) * nx) * num_pixel_bytes;
-
-            data[pixel_idx + 0] = (unsigned char) ir;
-            data[pixel_idx + 1] = (unsigned char) ig;
-            data[pixel_idx + 2] = (unsigned char) ib;
-        }
+        trace_line(j, nx, ny, ns, cam, world, data);
     }
 
     const char *filename = "foo.png";
