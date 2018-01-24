@@ -1,3 +1,4 @@
+#include <thread>
 #include <iostream>
 #include <float.h>
 
@@ -28,9 +29,12 @@ vec3 color(const ray& r, hitable *world, int depth) {
 }
 
 const int num_pixel_bytes = 3;
+const int nx = 400;
+const int ny = 200;
+const int ns = 100;
 
-void trace_line(int j, int nx, int ny, int ns, const camera& cam, hitable *world, unsigned char *data) {
-    std::cout << "tracing line " << (j+1) << "/" << ny << std::endl;
+void trace_line(int t_id, int j, const camera& cam, hitable *world, unsigned char *data) {
+    std::cout << t_id << ") tracing line " << (j+1) << "/" << ny << std::endl;
     for (int i = 0; i < nx; i++) {
 
         vec3 col(0, 0, 0);
@@ -56,10 +60,18 @@ void trace_line(int j, int nx, int ny, int ns, const camera& cam, hitable *world
 
 }
 
+void trace(int t_id, const camera& cam, hitable *world, unsigned char *data) {
+    std::cout << "Begin Tracing thread_id: " << t_id << ", " << nx << "x" << ny << std::endl;
+
+    for (int j = ny-1; j >= 0; j--) {
+        if ((j & 0b111) == t_id) {
+            trace_line(t_id, j, cam, world, data);
+        }
+    }
+
+}
+
 int main() {
-    const int nx = 200;
-    const int ny = 100;
-    const int ns = 100;
 
     hitable *list[4];
     list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
@@ -76,10 +88,13 @@ int main() {
     unsigned int hardware_concurrency = std::thread::hardware_concurrency();
     std::cout << hardware_concurrency << " concurrent threads are supported.\n";
 
-    std::cout << "Begin Tracing " << nx << " " << ny << std::endl;
+    std::thread* threads[hardware_concurrency];
+    for (int t_id = 0; t_id < hardware_concurrency; t_id++) {
+        threads[t_id] = new std::thread(trace, t_id, cam, world, data);
+    }
 
-    for (int j = ny-1; j >= 0; j--) {
-        trace_line(j, nx, ny, ns, cam, world, data);
+    for (int t_id = 0; t_id < hardware_concurrency; t_id++) {
+        threads[t_id]->join();
     }
 
     const char *filename = "foo.png";
