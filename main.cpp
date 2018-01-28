@@ -108,4 +108,9 @@ int main() {
     // using num_pixel_bytes for comp parameter, where 1=Y, 2=YA, 3=RGB, 4=RGBA
     stbi_write_png(filename, nx, ny, num_pixel_bytes, data, 0);
 
+    std::cout << std::endl << std::endl << "Cleaning up" << std::endl;
+    for (std::vector<hitable *>::iterator it = list.begin(); it != list.end(); it++) {
+        delete *it;
+    }
+
 }
