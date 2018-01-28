@@ -72,9 +72,9 @@ void trace(int t_id, const camera& cam, hitable *world, unsigned char *data) {
 
 }
 
-hitable *random_scene() {
-    std::vector<hitable *> list;
-    list.push_back(new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5))));
+std::vector<hitable *> random_scene() {
+    std::vector<hitable *> vecarr;
+    vecarr.push_back(new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5))));
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
             float choose_mat = drand48();
@@ -91,27 +91,34 @@ hitable *random_scene() {
                 } else { // glass
                     s = new sphere(center, 0.2, new dielectric(1.5));
                 }
-                list.push_back(s);
+                vecarr.push_back(s);
             }
         }
     }
-    list.push_back(new sphere(vec3(0, 1, 0), 1, new dielectric(1.5)));
-    list.push_back(new sphere(vec3(-4, 1, 0), 1, new lambertian(vec3(0.4, 0.2, 0.1))));
-    list.push_back(new sphere(vec3(4, 1, 0), 1, new metal(vec3(0.7, 0.6, 0.5), 0)));
-    std::cout << list.size() << " spheres" << std::endl;
-    return new hitable_list(list.data(), list.size());
+    vecarr.push_back(new sphere(vec3(0, 1, 0), 1, new dielectric(1.5)));
+    vecarr.push_back(new sphere(vec3(-4, 1, 0), 1, new lambertian(vec3(0.4, 0.2, 0.1))));
+    vecarr.push_back(new sphere(vec3(4, 1, 0), 1, new metal(vec3(0.7, 0.6, 0.5), 0)));
+
+    std::cout << "random scene of " << vecarr.size() << " spheres" << std::endl;
+    return vecarr;
+}
+
+std::vector<hitable *> simple_scene() {
+    std::vector<hitable *> vecarr;
+
+    vecarr.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
+    vecarr.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
+    vecarr.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
+    vecarr.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
+    vecarr.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
+
+    std::cout << "simple scene of " << vecarr.size() << " spheres" << std::endl;
+    return vecarr;
 }
 
 int main() {
-
-    // list.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
-    // list.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
-    // list.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
-    // list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
-    // list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
-    // hitable *world = new hitable_list(list.data(), list.size());
-
-    hitable *world = random_scene();
+    hitable *world = new hitable_list(simple_scene());
+    // hitable *world = new hitable_list(random_scene());
 
     vec3 lookfrom(13, 2, 3);
     vec3 lookat(0, 0, 0);
@@ -133,15 +140,11 @@ int main() {
         threads[t_id]->join();
     }
 
+    delete world;
+
     const char *filename = "foo.png";
     std::cout << std::endl << std::endl << "Tracing complete, writing " << filename << std::endl;
     
     // using num_pixel_bytes for comp parameter, where 1=Y, 2=YA, 3=RGB, 4=RGBA
     stbi_write_png(filename, nx, ny, num_pixel_bytes, data, 0);
-
-    // std::cout << std::endl << std::endl << "Cleaning up" << std::endl;
-    // for (std::vector<hitable *>::iterator it = list.begin(); it != list.end(); it++) {
-    //     delete *it;
-    // }
-
 }

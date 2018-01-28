@@ -8,6 +8,7 @@ public:
     sphere() {}
     sphere(vec3 c, float r, material *m) : center(c), radius(r) { mat_ptr = m; }
     virtual ~sphere() {
+        std::cout << "Cleaning up sphere" << std::endl;
         delete mat_ptr;
     }
     virtual bool hit(const ray& r, float t_min, float t_max, hit_record &rec) const;
