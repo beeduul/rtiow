@@ -82,7 +82,11 @@ int main() {
     list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
     hitable *world = new hitable_list(list.data(), list.size());
 
-    camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 20, float(nx)/float(ny));
+    vec3 lookfrom(3, 3, 2);
+    vec3 lookat(0, 0, -1);
+    float dist_to_focus = (lookfrom - lookat).length();
+    float aperture = 2.0;
+    camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx)/float(ny), aperture, dist_to_focus);
 
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
 
