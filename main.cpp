@@ -74,18 +74,15 @@ void trace(int t_id, const camera& cam, hitable *world, unsigned char *data) {
 
 int main() {
 
-    const int num_spheres = 5;
-
     std::vector<hitable *> list;
-
     list.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
     list.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
     list.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
     list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
     list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
+    hitable *world = new hitable_list(list.data(), list.size());
 
     camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 20, float(nx)/float(ny));
-    hitable *world = new hitable_list(list.data(), list.size());
 
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
 
