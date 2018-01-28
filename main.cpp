@@ -72,20 +72,51 @@ void trace(int t_id, const camera& cam, hitable *world, unsigned char *data) {
 
 }
 
+hitable *random_scene() {
+    std::vector<hitable *> list;
+    list.push_back(new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5))));
+    for (int a = -11; a < 11; a++) {
+        for (int b = -11; b < 11; b++) {
+            float choose_mat = drand48();
+            vec3 center(a + 0.9*drand48(), 0.2, b + 0.9*drand48());
+            if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
+                sphere *s;
+                if (choose_mat < 0.8) { // diffuse
+                    vec3 albedo(drand48()*drand48(), drand48()*drand48(), drand48()*drand48());
+                    s = new sphere(center, 0.2, new lambertian(albedo));
+                } else if (choose_mat < 0.5) { // metal
+                    vec3 albedo(0.5 * (1 + drand48()), 0.5 * (1 + drand48()), 0.5 * (1 + drand48()));
+                    float fuzz = 0.5 * drand48();
+                    s = new sphere(center, 0.2, new metal(albedo, fuzz));
+                } else { // glass
+                    s = new sphere(center, 0.2, new dielectric(1.5));
+                }
+                list.push_back(s);
+            }
+        }
+    }
+    list.push_back(new sphere(vec3(0, 1, 0), 1, new dielectric(1.5)));
+    list.push_back(new sphere(vec3(-4, 1, 0), 1, new lambertian(vec3(0.4, 0.2, 0.1))));
+    list.push_back(new sphere(vec3(4, 1, 0), 1, new metal(vec3(0.7, 0.6, 0.5), 0)));
+    std::cout << list.size() << " spheres" << std::endl;
+    return new hitable_list(list.data(), list.size());
+}
+
 int main() {
 
-    std::vector<hitable *> list;
-    list.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
-    list.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
-    list.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
-    list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
-    list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
-    hitable *world = new hitable_list(list.data(), list.size());
+    // list.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
+    // list.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
+    // list.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
+    // list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
+    // list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
+    // hitable *world = new hitable_list(list.data(), list.size());
 
-    vec3 lookfrom(3, 3, 2);
-    vec3 lookat(0, 0, -1);
-    float dist_to_focus = (lookfrom - lookat).length();
-    float aperture = 2.0;
+    hitable *world = random_scene();
+
+    vec3 lookfrom(13, 2, 3);
+    vec3 lookat(0, 0, 0);
+    float dist_to_focus = 10.0;
+    float aperture = 0.1;
     camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx)/float(ny), aperture, dist_to_focus);
 
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
@@ -108,9 +139,9 @@ int main() {
     // using num_pixel_bytes for comp parameter, where 1=Y, 2=YA, 3=RGB, 4=RGBA
     stbi_write_png(filename, nx, ny, num_pixel_bytes, data, 0);
 
-    std::cout << std::endl << std::endl << "Cleaning up" << std::endl;
-    for (std::vector<hitable *>::iterator it = list.begin(); it != list.end(); it++) {
-        delete *it;
-    }
+    // std::cout << std::endl << std::endl << "Cleaning up" << std::endl;
+    // for (std::vector<hitable *>::iterator it = list.begin(); it != list.end(); it++) {
+    //     delete *it;
+    // }
 
 }
