@@ -1,5 +1,6 @@
 #include <thread>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <float.h>
 
@@ -35,7 +36,10 @@ const int ny = 200;
 const int ns = 100;
 
 void trace_line(int t_id, int j, const camera& cam, hitable *world, unsigned char *data) {
-    std::cout << t_id << ") tracing line " << (j+1) << "/" << ny << std::endl;
+    std::stringstream msg;
+    msg << t_id << ") tracing line " << (j+1) << "/" << ny << std::endl;
+    std::cout << msg.str();
+
     for (int i = 0; i < nx; i++) {
 
         vec3 col(0, 0, 0);
@@ -62,7 +66,9 @@ void trace_line(int t_id, int j, const camera& cam, hitable *world, unsigned cha
 }
 
 void trace(int t_id, const camera& cam, hitable *world, unsigned char *data) {
-    std::cout << "Begin Tracing thread_id: " << t_id << ", " << nx << "x" << ny << std::endl;
+    std::stringstream msg;
+    msg << "Begin Tracing thread_id: " << t_id << ", " << nx << "x" << ny << std::endl;
+    std::cout << msg.str();
 
     for (int j = ny-1; j >= 0; j--) {
         if ((j & 0b111) == t_id) {
@@ -99,7 +105,10 @@ std::vector<hitable *> random_scene() {
     vecarr.push_back(new sphere(vec3(-4, 1, 0), 1, new lambertian(vec3(0.4, 0.2, 0.1))));
     vecarr.push_back(new sphere(vec3(4, 1, 0), 1, new metal(vec3(0.7, 0.6, 0.5), 0)));
 
-    std::cout << "random scene of " << vecarr.size() << " spheres" << std::endl;
+    std::stringstream msg;
+    msg << "random scene of " << vecarr.size() << " spheres" << std::endl;
+    std::cout << msg.str();
+
     return vecarr;
 }
 
