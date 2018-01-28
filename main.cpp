@@ -1,5 +1,6 @@
 #include <thread>
 #include <iostream>
+#include <vector>
 #include <float.h>
 
 #include "hitable_list.hpp"
@@ -75,16 +76,17 @@ int main() {
 
     const int num_spheres = 5;
 
-    hitable *list[num_spheres];
-    list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5)));
-    list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0)));
-    list[2] = new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3));
-    list[3] = new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5));
-    list[4] = new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5));
+    std::vector<hitable *> list;
 
-    hitable *world = new hitable_list(list, num_spheres);
+    list.push_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.1, 0.2, 0.5))));
+    list.push_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0))));
+    list.push_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.3)));
+    list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
+    list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
 
     camera cam;
+    hitable *world = new hitable_list(list.data(), list.size());
+
 
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
 
