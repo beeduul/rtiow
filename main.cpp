@@ -84,9 +84,8 @@ int main() {
     list.push_back(new sphere(vec3(-1, 0, -1), 0.5, new dielectric(1.5)));
     list.push_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
 
-    camera cam;
+    camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 20, float(nx)/float(ny));
     hitable *world = new hitable_list(list.data(), list.size());
-
 
     unsigned char *data = new unsigned char [nx * ny * num_pixel_bytes];
 
